@@ -1,14 +1,29 @@
-# Routing and Tool Grant Map
+# MediaVault Routing and Tool Grant Map
 
-| Role | Route condition | Storage operations | Retrieval | Notes |
-|---|---|---|---|---|
-| orchestrator | Parent workflow coordination | write_entry, read_entry, list_entries, update_entry, delete_entry, audit_read | retrieve, ceiling confidential | Coordinates and audits the run. |
-| implementer | Code and implementation tasks | write_entry, read_entry, list_entries, update_entry | retrieve, ceiling internal | No delete access. |
-| reviewer | Code review tasks | read_entry, list_entries | retrieve, ceiling internal | Advisory only. |
-| tester | Test execution/reporting | read_entry, list_entries | retrieve, ceiling internal | Workspace remains read-only. |
-| project-manager | PR description and summaries | read_entry, list_entries | denied | Owns draft-pr-description. |
+| Role | Input | Output | Granted | Denied | Reason |
+|---|---|---|---|---|---|
+| Pagination Planner | Task + repo context | Plan + files + criteria | Read, Grep, Glob | Write, Edit, Bash | Planning is read-only |
+| Implementer | Approved plan | Modified files | file_read, file_write | task_tracker, test_runner | Cannot grade itself or update shared state |
+| Pagination Reviewer | Changes + criteria | PASS/REVISE report | Read, Grep, Glob | Write, Edit, Bash, file_write | Independent review must remain read-only |
+| Tester | Reviewed changes | PASS/FAIL evidence | file_read, test_runner | file_write, task_tracker | Testing must not mutate code |
 
-## Converted steps
+## Handoffs
 
-- validator: converted to deterministic code (ADR-001). No MCP access required.
-- routing: sample deterministic router included as a second decision-history example (ADR-002).
+Each handoff contains only:
+- bounded task
+- relevant file paths
+- prior result needed for the phase
+- constraints
+- acceptance criteria
+- required output format
+
+## Human Checkpoints
+
+- After planning, before implementation.
+- Before any consequential final/shared action.
+
+## Tool Boundary Under Test
+
+The Pagination Reviewer is intentionally denied file-writing capability.
+
+If the Reviewer could edit files, it could silently repair the implementation it is supposed to evaluate, destroying independent review.

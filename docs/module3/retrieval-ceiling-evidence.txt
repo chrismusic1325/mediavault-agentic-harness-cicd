@@ -1,0 +1,4 @@
+Role ceiling: internal
+Forbidden document: confidential-pagination-risk.md
+Returned: []
+PASS: confidential document excluded by system filter

@@ -1,0 +1,29 @@
+I read through the repository and changed nothing. Here's where the workflow stands.
+
+## Current verification approach
+
+- **Agent:** `.claude/agents/frontend-verifier.md` is at v0.2.0 (commit `a6da3ff`). It can use Read, Grep, Glob and Bash, with `permissionMode: default`. It reads `frontend/package.json`, runs `npm run verify`, and reports in six fixed sections: Overall Result, Build, Tests, Lint, Warnings or Errors, Recommendation. Each stage is marked PASS, FAIL or NOT RUN.
+- **Command:** `verify` runs `npm run build && npm test && npm run lint`, which is a Vite build, then Jest with coverage, then ESLint. Because the steps are joined with `&&`, it stops at the first failure, so anything after a failed stage really does not run.
+- **Rubric:** `docs/rubric.md` scores three dimensions: result accuracy, error/warning coverage, and clarity. There is also a scope-compliance gate: the run fails if it changes any files. To pass, every dimension needs at least 3/4 and the gate must pass.
+
+## Active constraints
+
+1. The verifier is read-only. It must not edit, create, delete, stage, commit or push anything.
+2. A stage can only be marked PASS or FAIL if it actually ran. If something blocks it first, it is NOT RUN.
+3. Blocking failures must be listed separately from non-blocking warnings.
+
+## What the current evidence shows
+
+- **The real Claude Code runs were blocked.** In `docs/module2/claude-runs/run-001.txt` and `run-002.txt`, both attempts to run `npm run verify` were stopped at the approval prompt. Run 002 handled this correctly: Build, Tests and Lint are all NOT RUN, and the approval block is listed as blocking.
+- **Nothing allows the command yet.** `.claude/` has only `agents/` and no `settings.json`, so the command will hit the same approval prompt next time.
+- **The only PASS comes from a different run.** `docs/module2/runs/run-002-report.md` shows PASS: 3/3 suites, 26/26 tests, 95.65% statement coverage, plus non-blocking React Router future-flag warnings. That evidence is not from the blocked agent runs in `claude-runs/`. The iteration log scores "Run 002" at 11/12 without saying which of the two runs it means, so it's worth checking that the log matches the evidence it cites.
+
+## A gap in the reporting rule
+
+The agent definition only lets Overall Result be **PASS or FAIL**. When every stage is blocked, the agent has to pick FAIL. Run 002 did that, calling it "FAIL (verification could not run)". The stage-level rule is followed, but the overall label mixes "the checks ran and failed" with "the checks never ran." A future version could allow Overall to be something like NOT RUN / BLOCKED. That would be a change to the agent, so I've left it alone.
+
+## Next recommended action
+
+Let `npm run verify` run in `frontend/`. Either approve it when prompted, or add a project permission rule such as `Bash(npm run verify:*)`. Then run `frontend-verifier` again to get evidence from an actual Claude Code run. Until that happens, the latest Claude Code result is still Build, Tests and Lint all NOT RUN, and none of them should be reported as passing.
+
+Untracked files still waiting to be committed or deliberately left out: `docs/module2/2.3-evidence/`, `module1-lab-upload/`, `module2-exercise-upload/`.

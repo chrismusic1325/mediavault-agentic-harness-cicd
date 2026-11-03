@@ -1,0 +1,26 @@
+The reviewer says **REVISE**: the plan isn't ready to implement as written. No files were modified and no tests were run.
+
+First, the checks CLAUDE.md asks for at the start of a session: the memory scope is MediaVault, and every project-memory entry has a review date in 2027, so none are stale.
+
+**What the reviewer confirmed in the planner's result**
+- The DAO pagination isn't on `main`. `MediaItemDao.java:33` has only the original 7-argument `search`, and the only `LIMIT` is an unrelated `LIMIT 1` in `create()` at line 107.
+- The controller doesn't accept page/size yet, and there are no pagination tests.
+- Decisions 003 and 004 and `pagination-continuation.md` wrongly say the DAO work exists. Decision-002 only says it "has started." Per the project rules, the code is the source of truth.
+- The two stashes are in a known order now: the DAO work is `stash@{1}`, commit `adfe16b` ("pre-module2-lab-existing-work"), and `stash@{0}` is a different stash. The reviewer read the order from git's stash log without running git, so it did not look at what that stash contains.
+
+**Blocking issues**
+1. **Step 0 (getting the DAO work onto `main`) has no approval point or acceptance criteria of its own.** The controller relies on the DAO capping size at 100, so the DAO work should be its own step with its own approval, review and tests. Those tests should cover the bound `LIMIT`/`OFFSET`, the cap (500 becomes 100) and the `id` tie-break.
+2. **The stash is named by position, not by commit.** Applying `stash@{0}`, as one evidence file says, would apply the wrong work. Name it by commit `adfe16b` and check what it changes before applying it.
+3. **Very large page numbers can overflow.** `page * size` overflows an `int` once `page` passes about 21.4 million. Pick a fix (compute the offset as a `long`, or cap `page` and return 400) and add a test for it.
+4. **The planned tests can't show that bad input returns a 400.** The current tests only check that an exception is thrown, which doesn't tell a 400 apart from a 403 or 404. Each test needs to check for `BAD_REQUEST` and that the DAO was never called. For non-numeric input like `page=abc`, either narrow the acceptance criterion or approve a MockMvc test. That would probably mean adding `spring-security-test` to `pom.xml`.
+
+**Smaller points:** sizes over 100 are capped silently (this matches decision-004, but it's still your call). The tests should check the exact arguments passed to the DAO. `publicItems` should be stated as out of scope rather than left as an open question.
+
+**Not run:** `mvn test`, the DAO and controller tests, inspecting the stash's contents, and checking Spring's 400 for non-numeric input.
+
+**Next step:** there's no implementation yet, so this goes back to you and then to `pagination-planner`, not to an Implementer. Before the planner revises the plan, you need to decide:
+1. Whether to apply the DAO work from commit `adfe16b` or rebuild it, as its own approved step.
+2. How to handle page-number overflow.
+3. Whether sizes over 100 are capped silently or rejected with a 400.
+4. Whether to add MockMvc tests (this changes `pom.xml`).
+5. Whether to correct the outdated "current state" lines in decisions 003 and 004 and `pagination-continuation.md`.

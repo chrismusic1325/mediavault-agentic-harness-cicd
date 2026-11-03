@@ -1,36 +1,37 @@
-# Calibration Log
+# Module 3 Calibration Log
 
-## Near-miss patterns for Module 4 governance
+## Calibration Cycle — November 3, 2026
 
-1. The implementer subagent nearly called `delete_entry` on the storage server because its tool grant was temporarily too broad.  
-   **Risk:** an implementer with delete access can silently remove project state that other subagents depend on.
+Failure mode: retrieval fallback misclassification.
 
-2. A reviewer subagent's task output nearly triggered the `run-tests` skill, which is meant for the implementer and tester.  
-   **Risk:** a read-only review role that can run tests can change the state of the workspace it is only supposed to inspect.
+Development task: evaluate the MediaVault Lessons Learned retrieval system
+against the fixed ground-truth set.
 
-3. An implementer requested a document tagged `confidential`, above its `internal` ceiling, and the retrieval server refused it.  
-   **Risk:** a role that can reach above its classification ceiling can pull sensitive material into a context it was not cleared for.
+Before fix: the retrieval keyword detector treated ordinary uppercase terms
+such as JSON and HTTP as literal identifiers. The system scored 4/6, or 67%,
+below the required 80% floor.
 
-## Conversion measurements
+Detection: the deterministic retrieval evaluation showed that Q2 and Q5 found
+the expected documents through the wrong retrieval path.
 
-### Before conversion — handoff validation agent
+Root cause: the keyword pattern was too broad.
 
-- Average cycle time: 45 seconds across three runs.
-- Token cost: $0.003 per run.
-- Deterministic harness checks: 7/7 passing.
-- Review latency: about 30 seconds.
+Fix layer: tool / retrieval configuration.
 
-### After conversion — deterministic handoff validator in isolation
+Targeted fix: keyword fallback was limited to code-like identifiers containing
+an underscore or digit. Ordinary terms such as JSON and HTTP now use semantic
+retrieval, while MAX_PAGE_SIZE still uses keyword fallback.
 
-- Average cycle time: 0.2 seconds across three runs.
-- Token cost: $0.
-- Deterministic harness checks: 7/7 passing.
-- Output variance: zero; `diff` reported no differences across three runs.
-- Review latency: about 5 seconds.
+After fix: the same unchanged ground-truth set scored 6/6, or 100%.
 
-### Integrated end-to-end regression check
+Before-fix evidence:
+docs/module3-lab-evidence/before-fix.md
 
-- Date: 2026-06-06
-- Result: 24/24 harness checks passing; no regressions.
-- Policy suite: passing.
-- Evidence: deterministic validator is wired into orchestration and governance artifacts are in sync.
+After-fix evidence:
+docs/module3-lab-evidence/after-fix.md
+
+Regression evidence:
+docs/module3-lab-evidence/regression-results.md
+
+Remaining limitation: the harness evaluates the failure modes currently covered
+by its checks. New failure modes may require additional checks.

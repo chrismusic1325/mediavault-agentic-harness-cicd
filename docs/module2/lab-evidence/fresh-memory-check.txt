@@ -1,0 +1,40 @@
+I read the memory as CLAUDE.md requires and changed no files. `SCOPE.md` names this repo as MediaVault. All the pagination memory entries are active and none is past its review date (earliest is 2027-01-29). The status and questions files have uncommitted edits, but they only reword the text; the meaning is the same as the committed versions.
+
+## 1. Next meaningful pagination task: the controller layer
+
+From `status/pagination-continuation.md` and decisions 002–004, the work is in `MediaItemController` (`GET /api/items` and `GET /api/items/public`):
+
+1. Add optional `page` and `size` query parameters.
+2. Validate them in the controller: pages start at 0, `page < 0` or `size < 1` returns HTTP 400, and sending only one of the two returns HTTP 400.
+3. Pass them to the DAO's paginated `search`. That method caps size at 100, uses `LIMIT ? OFFSET ?` with bound values, and sorts by `id` as a tie-breaker.
+4. Add controller tests for the pagination behaviour.
+
+If neither parameter is sent, the endpoint must keep returning the full list as a plain JSON array.
+
+**One conflict you should know about first.** Decisions 003 and 004 say the DAO pagination code and its tests already exist. They don't exist on `main`:
+- `backend/src/main/java/org/example/daos/MediaItemDao.java:33` has only the 7-argument `search`, with no `LIMIT`/`OFFSET` and no `id` tie-breaker.
+- `MediaItemDaoTest` has no pagination tests.
+- `MediaItemController.java:29-70` has no `page` or `size` parameters.
+
+The DAO work is saved in **`stash@{1}` ("pre-module2-lab-existing-work")**. It adds `MAX_PAGE_SIZE = 100`, a 9-argument `search(..., Integer page, Integer size)`, the `id` tie-breaker, and about 78 lines of DAO tests. It was never committed. I didn't check whether it's in any other branch's history, because that search needed approval.
+
+So before the controller work can start, someone has to bring the DAO code back into the working tree (apply the stash or redo it) and confirm its tests pass. I haven't done either. Decide how you want to restore it; it's also worth correcting the "Current state" lines in decisions 003 and 004 so a future session isn't misled the same way.
+
+## 2. Deliberately deferred work
+
+From `pagination-continuation.md`:
+- Frontend pagination controls
+- Total-count metadata
+- A page-envelope response such as `{ content, totalElements }`, which would break the existing React consumers (decision-002)
+- Pagination of the collection endpoints (`MediaCollectionController`)
+
+## 3. Open questions that shouldn't block the current work
+
+From `questions/pagination-open-questions.md`:
+1. Should the plain-array response eventually become a page envelope with count metadata?
+2. When should frontend pagination controls be added?
+3. Should the collection endpoints eventually use the same pagination contract?
+
+Decisions 002–004 stay authoritative until one of these is resolved and recorded as a new or superseding decision.
+
+**Separately:** several MCP connectors (Zapier, Airtable, Notion, Salesforce, Microsoft 365, Canva and others) need authorizing before they'll work. Do that through your claude.ai connector settings, or with `/mcp` in an interactive session. None of them were needed here.

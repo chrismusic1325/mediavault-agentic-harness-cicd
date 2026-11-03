@@ -1,0 +1,2 @@
+PASS: confidential write rejected
+PermissionError: storage rejects confidential and secret classifications

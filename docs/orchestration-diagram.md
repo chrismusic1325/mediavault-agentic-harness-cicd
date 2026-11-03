@@ -1,18 +1,35 @@
-# Orchestration Diagram
+# MediaVault Pagination Orchestration Diagram
 
-```mermaid
-flowchart TD
-    A[Orchestrator] --> B[Detect changed files]
-    B --> C[Validate handoff JSON\nvalidate_handoff_deterministic.py]
-    C --> D{Route task}
-    D -->|code| E[Implementer]
-    D -->|review| F[Reviewer]
-    D -->|tests| G[Tester]
-    D -->|description| H[Project Manager]
-    E --> I[Policy and eval gates]
-    F --> I
-    G --> I
-    H --> I
-```
+Human
+  |
+  v
+Orchestrator
+  |
+  +--> Pagination Planner
+  |      Input: pagination task + repo context
+  |      Output: ordered plan + files + acceptance criteria
+  |
+  +--> Human approval
+  |
+  +--> Implementer
+  |      Input: approved plan
+  |      Output: modified files
+  |
+  +--> Pagination Reviewer
+  |      Input: modified files + acceptance criteria
+  |      Output: PASS or REVISE review
+  |
+  +--> Tester
+  |      Input: reviewed implementation
+  |      Output: PASS or FAIL test evidence
+  |
+  +--> Human final approval
 
-The validator is deterministic and does not call a model. Agentic steps still run under the per-role governance policy.
+## Routing Rules
+
+- Incomplete plan -> return to Planner.
+- Human rejects plan -> return to Planner.
+- Reviewer returns REVISE -> return to Implementer.
+- Tester returns FAIL -> return to Implementer.
+- Same gate fails twice -> stop and escalate to the human.
+- Human approval is required before implementation and before consequential final actions.

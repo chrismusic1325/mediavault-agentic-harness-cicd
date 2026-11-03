@@ -1,0 +1,31 @@
+**Stop: one memory entry is expired and I need you to confirm it before I use it.**
+
+`.memory/project/decisions/decision-002.md` (the pagination API contract) has **Review by: 2026-08-01**. Today is 2026-11-03, so under the memory policy I'm treating it as untrusted. It also conflicts with the other memory:
+
+- **decision-002 says:** replace the plain-array response with a page envelope (`content`, `totalElements`), because all clients are "assumed" to have migrated.
+- **The index, `status/pagination-continuation.md` and `questions/pagination-open-questions.md` (all current) say:** keep the plain-array response for backward compatibility. The envelope and total counts are explicitly deferred.
+
+Its recorded date (2026-10-31) is also later than its review date, which doesn't make sense. The latest commit is `395a204 test: introduce controlled stale pagination memory`, so this looks like the stale version brought back. **Can you confirm whether decision-002's page-envelope contract is current?** Until you do, I'm going by the code, which returns a plain `List<MediaItem>`.
+
+**Current pagination approach (from the current entries 003 and 004, the continuation status, and the code)**
+- **Parameters:** optional `page` and `size` on media-item search. Pages are zero-based.
+- **Validation (decision-003):** checked at the controller. `page < 0`, `size < 1`, or only one of the two supplied returns HTTP 400.
+- **SQL (decision-004):** bound `LIMIT ? OFFSET ?` values, size capped at 100, and `id` as a secondary sort so page order is stable.
+- **Deferred:** frontend pagination, total counts, the page envelope, and paginating collections.
+
+**The code doesn't match the memory.** Decisions 003 and 004 say DAO pagination and its tests already exist. They don't on the current working tree:
+- `MediaItemDao.search(...)` (`backend/src/main/java/org/example/daos/MediaItemDao.java:33`) takes no page or size arguments. It has no `LIMIT`/`OFFSET` and no `id` tie-breaker.
+- `MediaItemDaoTest` has no pagination tests.
+- `MediaItemController` (lines 29–66) doesn't accept `page` or `size`.
+
+Lab notes in the untracked `lesson-4-lab-submission.patch` say the DAO work is in `stash@{0}` ("pre-module2-lab-existing-work"). Git commands needed approval, so I couldn't check that stash.
+
+**Recommended next step:** memory says to build the controller layer next, but it depends on DAO pagination that isn't on `main`. So:
+1. **Restore the DAO layer first.** Bring back the work in `stash@{0}` if it's there, or write it to match decision-004. Run `MediaItemDaoTest` and confirm it passes.
+2. **Then the controller.** Add optional `page`/`size` to both search endpoints, apply decision-003's 400 rules, keep the plain-array response, and add `MediaItemControllerTest` cases. Cover valid pages, negative page, zero size, and only one parameter supplied.
+
+Two things are still open:
+- **Sizes over 100:** decision-003 doesn't say whether these return 400 or are quietly reduced to 100. Earlier lab notes point out that quietly capping hides the change from the client, since a plain array carries no metadata. Decide this before writing the controller tests.
+- **Stale entry:** decision-002 needs your confirmation or a correction. If it's restored to the plain-array contract, it should get a new review date.
+
+I didn't modify any files.

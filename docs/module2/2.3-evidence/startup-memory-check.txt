@@ -1,0 +1,43 @@
+I read all five memory files and changed nothing.
+
+**Scope check:** `.memory/SCOPE.md` names this repository (`flexpath-final-project`) as **MediaVault**, so the scope matches and the memory applies here.
+
+## What's in memory
+
+| Layer | File | State |
+|---|---|---|
+| Scope | `.memory/SCOPE.md` | Says this memory belongs to MediaVault; created 2026-10-27 |
+| Project | `.memory/project/MEMORY_INDEX.md` | Index with 2 active entries, none archived, plus a pruning schedule |
+| Project | `.memory/project/decisions/decision-001.md` | Active; review by 2027-01-25 |
+| Knowledge | `.memory/knowledge/coding-standards.md` | The only Knowledge File; last reviewed 2026-10-27 |
+| Reference | `.memory/reference/REFERENCE_INDEX.md` | Empty: "No indexed reference documents are currently required" |
+
+**Project-memory entries:** The only project-memory entry is Decision 001. The index also lists `../knowledge/coding-standards.md` as an "active entry." That file lives in the Knowledge layer, not the project layer, so the index points to it without owning it.
+
+**Stale entries:** None. Today is 2026-10-27. Decision 001's review date is 2027-01-25, and the standards were reviewed today.
+
+## Decision 001: Evidence-based verification status
+
+- **Rule:** A frontend verification stage can only be marked **PASS** or **FAIL** if it actually ran. A stage that was blocked before it ran must be reported as **NOT RUN**.
+- **Why:** Earlier verification attempts were blocked by runtime permission prompts before the command could run. Calling those stages passed or failed would be a conclusion with no evidence behind it. Using three states keeps problems with the app separate from problems with the environment.
+- **Rejected alternatives:**
+  - A single pass/fail result for the whole run, because it hides which stages actually ran.
+  - Reusing results from a previous session, because each report must use current evidence.
+- **Scope and review trigger:** It covers the MediaVault frontend verification workflow. It should be reviewed if the workflow, the permission model or the reporting requirements change significantly.
+
+## Standards from `coding-standards.md`
+
+1. **Preserve existing architecture:** Keep the React frontend, Spring Boot backend, Spring JDBC and MySQL structure unless a requirement explicitly calls for a change.
+2. **Evidence before conclusions:** Don't report any build, test, lint or verification result that current command output doesn't support.
+3. **Keep changes focused:** Make the smallest change that meets the requirement, with no unrelated refactors.
+4. **Tests must reflect behavior:** When production behavior changes, update or add tests instead of relying only on manual inspection.
+5. **Do not store secrets:** Never put passwords, tokens, API keys or credentials in code, Git history or memory.
+6. **Respect read-only areas:** Knowledge and reference content is maintained by people and must not be changed.
+7. **The repository is the source of truth:** Memory provides context, but the code, tests, config and Git state show what is actually implemented.
+
+## What I can and can't modify
+
+- **I can modify `.memory/project/`** (the index and decisions), but only for significant project decisions or state changes that need to carry over to future sessions. Before adding an entry I'd check the index and update or supersede an existing one rather than create a duplicate. No secrets or personal data can go there.
+- **`.memory/knowledge/` is read-only.** I can't change its contents or permissions without your explicit instruction.
+- **`.memory/reference/` is read-only** too, and I only consult it when background material is relevant.
+- **`.memory/SCOPE.md`:** CLAUDE.md doesn't list it as writable, so I'll treat it as read-only.

@@ -1,0 +1,43 @@
+The planner has finished its plan. One thing blocks implementation: the DAO pagination that the memory entries describe as finished isn't on `main`. I checked `MediaItemDao.java`. It has a single `search(...)` method at line 33 with no page/size arguments, no `MAX_PAGE_SIZE`, and no `LIMIT ? OFFSET ?`. The only `LIMIT` in the file is an unrelated `LIMIT 1` at line 107. Decisions 002, 003 and 004 all say the DAO work exists, so the memory is out of date compared with the code.
+
+I confirmed the repo is MediaVault and that all the memory entries used are current (review dates are in 2027). No files were modified.
+
+## Plan summary
+
+**Scope:** add optional `page`/`size` query parameters to `GET /api/items`, validate them in the controller, keep the plain `List<MediaItem>` response, and add controller tests. Out of scope: frontend controls, total counts or any response wrapper, collection endpoints, and unrelated refactoring.
+
+**Steps:**
+0. **Prerequisite:** get the decision-004 DAO behaviour onto the working tree, with its tests:
+   - a paginated `search` overload
+   - a cap of 100 on `size`
+   - `id` added to the ORDER BY as a tie-break
+   - a bound `LIMIT`/`OFFSET`
+1. Add `@RequestParam(required = false) Integer page` and `Integer size` to `items(...)`, with no defaults.
+2. Add `validatePagination`. It returns 400 if only one of the two is sent, if `page < 0`, or if `size < 1`. `size > 100` goes through to the DAO, which caps it.
+3. Validate before calling the DAO. If both parameters are missing, call the existing `search` exactly as today. If both are present, call the paginated overload.
+4. Update the existing `publicAndAuthenticatedSearchDelegate` test for the new signature.
+5. Add tests for:
+   - the no-parameter path
+   - a valid `page=0, size=10`
+   - each 400 case, checking that the DAO is never called
+   - `size=500` being passed through
+6. Run `mvn test` in `backend/` and report the actual output, then hand off to `pagination-reviewer`.
+
+**Files:** `MediaItemController.java` and `MediaItemControllerTest.java`. If step 0 goes ahead, also `MediaItemDao.java` and `MediaItemDaoTest.java`.
+
+**Acceptance criteria:**
+- Requests without page/size behave exactly as before, so the frontend needs no changes.
+- Valid page/size values are passed to the DAO unchanged.
+- The response has no envelope.
+- Every invalid input returns 400 and the DAO is never called.
+- Existing tests still pass and `mvn test` is green.
+
+## Your decisions before implementation
+
+1. **How should the DAO work get onto `main`?** You could apply the "pre-module2-lab-existing-work" stash, but the evidence files disagree on whether it's `stash@{0}` or `stash@{1}`. Or the Implementer could rebuild it as a separately reviewed step. Separately, should decisions 002, 003 and 004 and `pagination-continuation.md` be corrected so they stop saying the DAO work is done?
+2. **Should `GET /api/items/public` (`publicItems`) also get page/size?**
+3. **For `size > 100`, should the DAO cap it silently, as decision-004 says, or should the controller return 400?** With silent capping, a client asking for 500 gets 100 items with no signal.
+4. **Should a MockMvc test be added for non-numeric input like `page=abc`?** Spring already returns 400 for it, but the current unit-test style can't prove that.
+5. **How should very large `page` values be handled?** `page * size` could overflow if the offset is computed as an `int`. The options are an upper limit on `page` in the controller, or computing the offset as a `long` in the DAO.
+
+Per the workflow, I'll wait for your approval and answers before any implementation.

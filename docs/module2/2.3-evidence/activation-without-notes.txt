@@ -1,0 +1,32 @@
+I only read files for this assessment. Nothing was changed, and I didn't run `npm run verify`.
+
+## What has already been decided
+
+- **Approach:** a single read-only subagent, `.claude/agents/frontend-verifier.md`. It reads `frontend/package.json`, runs the existing `npm run verify` script, and reports. The script runs `vite build && jest --coverage && eslint .`. Because the steps are chained with `&&`, a failure stops everything after it.
+- **Version:** v0.2.0, from commit `a6da3ff`, is the current definition. It replaced v0.1.0 (`2222633`), which only produced a free-form summary. v0.2.0 requires six fixed sections: Overall, Build, Tests, Lint, Warnings or Errors, and Recommendation. Each stage gets PASS, FAIL or NOT RUN, and the agent must not claim that a stage passed if it never ran.
+- **Rubric:** `docs/module2/frontend-verifier-rubric.md` scores three dimensions from 1 to 4, plus a Scope Compliance pass/fail gate. To pass, every dimension must score at least 3 and scope must pass.
+- **Recorded result:** the iteration log scores Run 001 at 7/12 and Run 002 at 11/12. On paper, v0.2.0 meets the pass threshold and is treated as the accepted version.
+- **Known warning:** the React Router future-flag messages during Jest are classed as non-blocking and left for a future dependency upgrade.
+
+## Constraints
+
+- **The agent is read-only:** it can use only Read, Grep, Glob and Bash. It must not edit, create, stage, commit or push anything.
+- **Permissions block the agent:** it uses `permissionMode: default` and the repo has no `.claude/settings.json` allow rules. As a result, `npm run verify` needs approval every time, and non-interactive runs can't grant it.
+- **Verification has to go through the existing `verify` script**, not individual commands chosen by the agent.
+- **This session:** no `--continue` or `--resume`, no `CLAUDE.md`, and `.memory/{knowledge,project,reference}` are empty folders. I rebuilt all of this from the repo and git history only.
+
+## The main problem
+
+The log and the actual agent output don't match:
+
+- The real Claude Code transcripts in `docs/module2/claude-runs/` show that **both runs were blocked at the permission prompt**. No build, test or lint stage ran in either one.
+- The PASS evidence (3 suites and 26 tests passed, 95.65% statement coverage) comes from `docs/module2/runs/*-terminal.txt`. That looks like `npm run verify` being run directly, not by the agent.
+- The rewritten iteration log (`30efcdc`) attaches the agent runs' cycle times to the rubric scores but never mentions the block.
+- In fairness, the Run 002 transcript is a good v0.2.0 response. It reported FAIL with every stage NOT RUN and didn't claim a pass. But the 11/12 score is partly based on a result the agent never actually produced.
+
+## Next steps
+
+1. **Record this session as Module 2.3 evidence.** `docs/module2/2.3-evidence/activation-without-notes.txt` is empty (0 bytes) and `module2-3-upload/` is empty. Together with the empty `.memory/` folders, that suggests this run is the "activation without notes" baseline: save this response there first. That's my guess from the folder names; no file confirms it. The next step would be writing the decisions above into `.memory/` and running the same prompt again.
+2. **Fix the verifier evidence gap.** Add a narrowly scoped project permission that allows only `npm run verify` in `frontend/`, rerun the agent through Claude Code, and update the iteration log to reflect the permission-blocked runs. Re-scoring should only use output the agent actually produced. Until then, I wouldn't call v0.2.0 validated.
+
+Minor housekeeping: `module1-lab-upload/`, `module2-exercise-upload/` and `docs/module2/2.3-evidence/` are untracked. The two files in `module2-exercise-upload/` are identical to the committed versions.

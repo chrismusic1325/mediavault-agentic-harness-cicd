@@ -1,0 +1,61 @@
+{
+  "overall_pass_threshold": 3.0,
+  "dimensions": [
+    {
+      "name": "Correctness",
+      "description": "Whether conclusions and proposed actions are technically correct for the available evidence.",
+      "pass_threshold": 3,
+      "levels": {
+        "1": "Substantially incorrect or unsupported.",
+        "2": "Partially correct but contains important errors.",
+        "3": "Correct with only minor limitations.",
+        "4": "Correct, precise, and fully supported."
+      },
+      "examples": [
+        "Correctly distinguishes current repository state from intended future work."
+      ]
+    },
+    {
+      "name": "Task Adherence",
+      "description": "Whether the workflow follows the requested scope, role boundaries, and acceptance criteria.",
+      "pass_threshold": 3,
+      "levels": {
+        "1": "Ignores major requirements.",
+        "2": "Meets some requirements but misses important constraints.",
+        "3": "Meets the requested task and constraints.",
+        "4": "Fully satisfies the task with disciplined scope."
+      },
+      "examples": [
+        "Reviewer evaluates work without modifying implementation files."
+      ]
+    },
+    {
+      "name": "Groundedness",
+      "description": "Whether important claims are tied to repository, retrieval, test, or audit evidence.",
+      "pass_threshold": 3,
+      "levels": {
+        "1": "Primarily speculative.",
+        "2": "Some evidence but important claims are unsupported.",
+        "3": "Key claims are supported by evidence.",
+        "4": "Claims are consistently traceable to strong evidence."
+      },
+      "examples": [
+        "Retrieved lessons include citations and repository claims reference current evidence."
+      ]
+    },
+    {
+      "name": "Review Quality",
+      "description": "Whether review identifies meaningful risks and routes unresolved issues appropriately.",
+      "pass_threshold": 3,
+      "levels": {
+        "1": "Misses important defects.",
+        "2": "Finds surface issues but misses major risks.",
+        "3": "Finds important issues and recommends an appropriate route.",
+        "4": "Provides thorough, prioritized, evidence-based review."
+      },
+      "examples": [
+        "A blocking pagination issue produces REVISE instead of silently advancing."
+      ]
+    }
+  ]
+}

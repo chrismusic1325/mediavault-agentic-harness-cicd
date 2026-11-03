@@ -1,0 +1,47 @@
+I didn't modify any files. One memory entry is stale and you need to confirm it before I can fully settle the recommendation. Also, the DAO pagination work that memory describes as done is not on `main`.
+
+## Expired memory entry: needs your confirmation
+
+**`.memory/project/decisions/decision-002.md`: its review date of 2026-08-01 has passed** (today is 2026-11-03). Under the stale-memory policy I am treating it as untrusted.
+
+It also conflicts with the rest of the memory and with Git history:
+- **decision-002 now says:** replace the plain JSON array response with a `{ content, totalElements }` page envelope, on the grounds that all clients are "assumed" to have migrated.
+- **Current entries say the opposite.** `status/pagination-continuation.md` and `questions/pagination-open-questions.md` (both review by 2027-02-01) say the plain-array response stays and the page envelope is deferred. The index entry for decision-002 also says "retaining the existing plain-array response."
+- **Git history:** commit `5f711dd` ("test: rerun controlled stale pagination memory") replaced the earlier text, which was dated for review by 2027-01-29. That earlier text kept the plain array because the React pages expect an array.
+
+**Please confirm whether decision-002 as written is still current.** Until you do, I'm not using it to decide the API response shape.
+
+## Current pagination approach
+
+From the current memory entries (decisions 003 and 004, the status entry and the open questions):
+- **Parameters:** `page` and `size` on media-item search. Pages start at 0.
+- **Validation (decision-003):** checked in the controller. `page < 0`, `size < 1`, or sending only one of the two returns HTTP 400.
+- **SQL (decision-004):** `LIMIT ? OFFSET ?` with bound parameters, page size capped at 100, and `id` added as a second sort key so page order is stable.
+- **Deferred:** frontend pagination controls, total counts, and the page envelope.
+
+## What the repository actually contains
+
+- **`main`:** no pagination yet. `MediaItemDao.search` (`backend/src/main/java/org/example/daos/MediaItemDao.java:33`) has no page/size parameters and no `id` tie-breaker. `MediaItemController` (`backend/src/main/java/org/example/controllers/MediaItemController.java:29`, `:50`) returns a plain `List<MediaItem>`. No tests mention pagination.
+- **The DAO work exists only in `stash@{0}`** ("pre-module2-lab-existing-work"). It adds:
+  - an overload `search(..., Integer page, Integer size)`;
+  - `MAX_PAGE_SIZE = 100`;
+  - `, id <direction>` as the second sort key;
+  - `LIMIT ? OFFSET ?`, applied only when both values are sent;
+  - three DAO tests for these.
+
+  It isn't on any branch.
+
+So decision-003 and decision-004 overstate what's on `main` when they say "DAO pagination support exists."
+
+## Recommended next step
+
+1. **Bring back the DAO work:** apply `stash@{0}` to a feature branch, then run `MediaItemDaoTest` to confirm it still passes. This step doesn't depend on decision-002.
+2. **Add controller validation and tests:** add optional `page` and `size` to both `GET /api/items` and `GET /api/items/public`. Enforce the decision-003 rules there, pass the values to the paged DAO overload, and add controller tests covering:
+   - full list when both are omitted;
+   - a valid page;
+   - each 400 case;
+   - the size cap of 100.
+
+The response shape for step 2 depends on your answer about decision-002. If the plain-array contract still holds, the endpoints keep returning `List<MediaItem>` and the frontend doesn't change. If you confirm the page envelope instead, it becomes a breaking change that needs coordinated frontend changes.
+
+Separately, the working tree has uncommitted edits to the two `docs/module2/2.4-exercise-evidence/*.txt` files and an untracked `lesson-4-lab-submission.patch`. I didn't touch them.

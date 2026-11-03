@@ -1,0 +1,36 @@
+I read the memory and checked the repo. I didn't modify any files or run `npm run verify`.
+
+## Session start checks
+- **Scope:** `.memory/SCOPE.md` names this repository as **MediaVault**, so the memory applies here.
+- **Freshness:** The only active project decision is `decision-001.md`, recorded 2026-10-27 with a review date of 2027-01-25. That date hasn't passed, so it's safe to rely on.
+- I didn't open the reference index because the stable standards and repo files covered this question.
+
+## What the repo shows
+- **Command:** `frontend/package.json:12` defines `verify` as `npm run build && npm test && npm run lint`. Because the stages are joined with `&&`, they run in order and stop at the first failure. If the build fails, tests and lint never run.
+- **Agent:** `.claude/agents/frontend-verifier.md` (v0.2.0) can only use Read, Grep, Glob and Bash, and runs with `permissionMode: default`. It must write its report in six fixed sections and may not change project files.
+- **Permissions:** The project has no `.claude/settings*.json`, so nothing pre-approves `npm run verify`.
+- **Latest run:** In `docs/module2/claude-runs/run-002.txt`, both attempts to run `verify` were stopped at the approval prompt. Build, Tests and Lint were all reported as **NOT RUN**, so the frontend has never actually been verified.
+
+## The active verification rule (decision-001)
+Each stage (Build, Tests, Lint) can only be marked **PASS** or **FAIL** if it actually ran in the current session. A stage that was blocked before it started must be marked **NOT RUN**. Results from earlier sessions can't be reused.
+
+The rule exists because permission prompts had stopped the command from running. Calling those stages passed or failed would be a conclusion with no evidence behind it.
+
+**One gap to flag:** the agent's "Overall Result" section only allows PASS or FAIL. So run-002 reported "FAIL (verification could not run)". That fits the template, but it blurs the line the decision is meant to keep: an environment problem is not an application failure. This is worth a decision from you. I haven't changed anything.
+
+## Relevant stable standards (`.memory/knowledge/coding-standards.md`)
+- **Evidence before conclusions:** don't report any build, test, lint or verification result without current command output to back it up.
+- **The repo is the source of truth:** memory gives context, but `package.json`, the agent definition and Git state decide what's actually implemented.
+- **Keep changes focused:** if the permission setup changes, change only what's needed to let `npm run verify` run, and don't widen the agent's tools.
+- **No secrets** in memory, and **don't change the read-only areas** (knowledge and reference).
+
+## Next step
+Get `npm run verify` actually running, then make a fresh, evidence-backed run. You have two options:
+1. Approve the command when it's prompted, or add a narrow allow rule such as `Bash(npm run verify)` in `.claude/settings.json`. Then call `frontend-verifier` again. This changes the setup, so it's your call.
+2. Run `npm run verify` yourself in `frontend/` and pass the output to the verifier to review.
+
+Either way, record the run as `run-003` and label every stage from that output alone.
+
+There are also three untracked folders: `docs/module2/2.3-evidence/`, `module1-lab-upload/` and `module2-exercise-upload/`. They don't affect verification, but you may want to commit them or add them to `.gitignore`.
+
+Several connected services also need sign-in before they can be used, including Zapier, Notion, Salesforce and Microsoft 365. Sign in through your claude.ai connector settings or `/mcp`. None of them are needed for this workflow.

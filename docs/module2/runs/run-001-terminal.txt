@@ -1,0 +1,127 @@
+
+> vite-project@0.0.0 verify
+> npm run build && npm test && npm run lint
+
+
+> vite-project@0.0.0 build
+> vite build
+
+[36mvite v5.4.11 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 44 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  0.91 kB[22m[1m[22m[2m │ gzip:  0.54 kB[22m
+[2mdist/[22m[35massets/index-CTjQ948V.css  [39m[1m[2m  2.63 kB[22m[1m[22m[2m │ gzip:  1.14 kB[22m
+[2mdist/[22m[36massets/index-B_NzFR5Q.js   [39m[1m[2m178.53 kB[22m[1m[22m[2m │ gzip: 56.92 kB[22m
+[32m✓ built in 8.75s[39m
+
+> vite-project@0.0.0 test
+> jest --config jest.config.cjs --runInBand --coverage
+
+PASS src/app.test.jsx (6.777 s)
+  ● Console
+
+    console.warn
+      ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+      at warn (node_modules/react-router/lib/deprecations.ts:9:13)
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:26:5)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/components.tsx:257:25)
+      at commitHookEffectListMount (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13038:26)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14461:11)
+      at commitPassiveMountEffects_complete (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14421:9)
+      at commitPassiveMountEffects_begin (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14408:7)
+      at commitPassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14396:3)
+      at flushPassiveEffectsImpl (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16287:3)
+      at flushPassiveEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16236:14)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16051:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2521:11)
+      at render (src/<stdin>:70:9)
+      at Object.<anonymous> (src/<stdin>:355:17)
+
+    console.warn
+      ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+      at warn (node_modules/react-router/lib/deprecations.ts:9:13)
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:37:5)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/components.tsx:257:25)
+      at commitHookEffectListMount (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13038:26)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14461:11)
+      at commitPassiveMountEffects_complete (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14421:9)
+      at commitPassiveMountEffects_begin (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14408:7)
+      at commitPassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14396:3)
+      at flushPassiveEffectsImpl (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16287:3)
+      at flushPassiveEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16236:14)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16051:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2521:11)
+      at render (src/<stdin>:70:9)
+      at Object.<anonymous> (src/<stdin>:355:17)
+
+PASS src/rubric-ui.test.jsx
+  ● Console
+
+    console.warn
+      ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+      at warn (node_modules/react-router/lib/deprecations.ts:9:13)
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:26:5)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/components.tsx:257:25)
+      at commitHookEffectListMount (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13038:26)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14461:11)
+      at commitPassiveMountEffects_complete (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14421:9)
+      at commitPassiveMountEffects_begin (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14408:7)
+      at commitPassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14396:3)
+      at flushPassiveEffectsImpl (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16287:3)
+      at flushPassiveEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16236:14)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16051:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2521:11)
+      at Object.<anonymous> (src/<stdin>:66:15)
+
+    console.warn
+      ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+      at warn (node_modules/react-router/lib/deprecations.ts:9:13)
+      at warnOnce (node_modules/react-router/lib/deprecations.ts:14:3)
+      at logDeprecation (node_modules/react-router/lib/deprecations.ts:37:5)
+      at logV6DeprecationWarnings (node_modules/react-router/lib/components.tsx:257:25)
+      at commitHookEffectListMount (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:13038:26)
+      at commitPassiveMountOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14461:11)
+      at commitPassiveMountEffects_complete (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14421:9)
+      at commitPassiveMountEffects_begin (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14408:7)
+      at commitPassiveMountEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14396:3)
+      at flushPassiveEffectsImpl (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16287:3)
+      at flushPassiveEffects (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16236:14)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:16051:9
+      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)
+      at act (node_modules/react/cjs/react.development.js:2521:11)
+      at Object.<anonymous> (src/<stdin>:66:15)
+
+PASS src/utils.test.js
+----------------|---------|----------|---------|---------|---------------------------------
+File            | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s               
+----------------|---------|----------|---------|---------|---------------------------------
+All files       |   95.65 |      100 |   98.46 |   98.33 |                                 
+ src            |     100 |      100 |     100 |     100 |                                 
+  <stdin>       |     100 |      100 |     100 |     100 |                                 
+ src/components |     100 |      100 |     100 |     100 |                                 
+  <stdin>       |     100 |      100 |     100 |     100 |                                 
+ src/pages      |   94.51 |      100 |   97.82 |   97.52 |                                 
+  <stdin>       |   94.51 |      100 |   97.82 |   97.52 | 204-206,267-270,339-342,414-415 
+----------------|---------|----------|---------|---------|---------------------------------
+
+Test Suites: 3 passed, 3 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        13.72 s
+Ran all test suites.
+
+> vite-project@0.0.0 lint
+> eslint .
+

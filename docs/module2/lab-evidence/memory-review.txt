@@ -1,0 +1,41 @@
+I read the MediaVault memory and checked it against the repo. I didn't modify anything.
+
+## Startup checks
+- **Scope:** `.memory/SCOPE.md` names MediaVault / flexpath-final-project, so it matches.
+- **Freshness:** decision-001 is due for review 2027-01-25 and decisions 002–004 are due 2027-01-29. Today is 2026-11-03, so none have expired and I can use all of them.
+- **Restored after the test:** decision-002 is back to the plain-array contract (`f42bac0`), so the stale page-envelope version from the failure test is gone.
+
+## Most important cross-session status
+**The memory says the DAO pagination is done, but it isn't on `main`. That work exists only in a git stash.**
+
+- Decisions 002–004 say the DAO pagination and its tests are in place. Decision 004 says: "The DAO implementation and DAO tests contain this behavior."
+- On `main`, `MediaItemDao.search()` (`backend/src/main/java/org/example/daos/MediaItemDao.java:33`) has no `page`/`size` parameters, no `LIMIT ? OFFSET ?`, and no `id` tie-breaker. It only sorts by a single column.
+- The work is in `stash@{0}` ("pre-module2-lab-existing-work"), which changes `MediaItemDao.java` (+38 lines) and `MediaItemDaoTest.java` (+78 lines). It contains `MAX_PAGE_SIZE = 100`, `Math.min(size, MAX_PAGE_SIZE)`, `, id` ordering and `LIMIT ? OFFSET ?`. This matches decision 004.
+- `MediaItemController` has no pagination parameters and no validation (decision 003 isn't implemented yet).
+- Since the repo is the source of truth, the real state is: **the controller isn't started, and the DAO work exists but isn't committed.** A fresh session that trusts memory would try to build the controller on DAO methods that `main` doesn't have. A routine `git stash drop` or `clear` would also lose the only copy.
+- One small thing: `docs/module2/lab-evidence/memory-review.txt` is untracked and empty (0 bytes).
+
+## Unresolved pagination question
+**What should happen when a client asks for `size > 100`: clamp it, or return HTTP 400?**
+
+- Decision 004 says to "cap" the size at 100, and the stashed DAO clamps it silently.
+- Decision 003 only defines `page < 0` and `size < 1` as invalid. It doesn't cover large sizes.
+- Decision 003 also rejected silently ignoring a lone `page`/`size` because "the client could believe pagination occurred when the server actually returned the full list." A silent clamp causes the same kind of mismatch: a client asks for 500, gets 100, and can't tell. The plain-array response from decision 002 has no metadata that would reveal it.
+
+This is my reading of the decisions; none of them records a choice. A human needs to make it before the controller validation and tests are written, because the answer changes what those tests check.
+
+## What belongs in project memory, and why
+Project memory should hold what a future session can't reliably work out from the code, plus decisions and their reasons:
+
+1. **Corrected status, in one place.** The three "Current state" lines are now misleading. I'd replace them with one workflow-scoped status entry, for example: "DAO pagination is in `stash@{0}`, not committed; the controller is not started." Pointing to where the work lives is enough; the code itself shouldn't be copied in. Remove the entry once the feature is merged, as the pruning schedule says.
+2. **The open question as an explicit Open entry.** That way the next session asks instead of guessing. Once decided, update decision 003 or 004 rather than adding a duplicate entry.
+3. **Decisions with their reasons.** Decisions 002–004 already do this: they record the plain array kept for backward compatibility, the 400 for a lone parameter, and the `id` tie-breaker. The repo can't explain why these choices were made.
+
+These should stay out of memory:
+- Code and test details, which are already in the source.
+- The story of the stale-memory test, which is in `docs/module2/` and git history.
+- Command output.
+- Credentials.
+- Anything in `.memory/knowledge/` or `.memory/reference/`, which agents may only read.
+
+To make these updates, I'd edit the three decision files and the index, and add the status entry. Restoring the stash (`git stash apply`, then commit) would be a separate step. I'll do either only if you ask.
